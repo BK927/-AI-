@@ -8,6 +8,8 @@
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=novelai.net
 // @grant        none
 // @license MIT
+// @updateURL https://openuserjs.org/meta/BK927/NovelAI_auto_generator.meta.js
+// @downloadURL https://openuserjs.org/install/BK927/NovelAI_auto_generator.user.js
 // ==/UserScript==
 
 (function() {
