@@ -7,6 +7,7 @@
 // @match        https://novelai.net/image
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=novelai.net
 // @grant        none
+// @license MIT
 // ==/UserScript==
 
 (function() {
