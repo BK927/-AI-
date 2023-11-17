@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NovelAI auto generator
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  nai로 무한 생성해보자.
 // @author       BK927
 // @match        https://novelai.net/image
@@ -67,9 +67,16 @@
     let countdown; // 남은 시간(초)
     let scheduledFlag = false;
 
+    // XPath를 사용하여 버튼을 선택하는 함수
+    function getButtonByXPath(xpath) {
+        const result = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+        return result.singleNodeValue;
+    }
+
     // 버튼 클릭 함수
     function clickButton() {
-        const button = document.querySelector('#__next > div.sc-5db1afd3-0.fgpNYC > div:nth-child(4) > div.sc-c17cfdb2-0.gEufow > div:nth-child(5) > button');
+        const xpath = '//*[@id="__next"]/div[2]/div[4]/div[1]/div[5]/button';
+        const button = getButtonByXPath(xpath);
         if (button && !button.disabled && checkbox.checked) {
             button.click();
             scheduledFlag = false;
@@ -98,14 +105,15 @@
 
     // 체크박스 이벤트 리스너
     checkbox.addEventListener('change', () => {
-        const button = document.querySelector('#__next > div.sc-5db1afd3-0.fgpNYC > div:nth-child(4) > div.sc-c17cfdb2-0.gEufow > div:nth-child(5) > button');
+        const xpath = '//*[@id="__next"]/div[2]/div[4]/div[1]/div[5]/button';
+        const button = getButtonByXPath(xpath);
         if (checkbox.checked) {
             clickButton(); // 첫 클릭 실행
             // 인터벌 설정
             setInterval(() => {
                 if (checkbox.checked && !button.disabled && !scheduledFlag) {
                     scheduledFlag = true;
-                    const delay = Math.random() * 8000 + 4000; // 4초에서 12초 사이의 랜덤 딜레이
+                    const delay = Math.random() * 6000 + 2000; // 2초에서 8초 사이의 랜덤 딜레이
                     scheduleNextClick(delay); // 다음 클릭 스케줄링 및 카운트다운 시작
                 }
             }, 500); // 0.5초마다 반복
