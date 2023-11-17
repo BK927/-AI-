@@ -12,6 +12,7 @@
 // @downloadURL https://openuserjs.org/install/BK927/NovelAI_auto_generator.user.js
 // ==/UserScript==
 
+
 (function() {
     // 스타일링을 위한 CSS 추가
     const style = document.createElement('style');
@@ -30,6 +31,16 @@
             display: flex;
             align-items: center; /* 요소들을 세로 중앙에 정렬 */
             white-space: nowrap;
+            -webkit-user-select:none;
+            -moz-user-select:none;
+            -ms-user-select:none;
+            user-select:none
+        }
+        #autoClickerCheckboxContainer:hover {
+            cursor: move;
+        }
+        #autoClickerCheckboxContainer:active {
+            cursor: move;
         }
         #autoClickerCheckbox {
             margin-right: 5px;
@@ -40,6 +51,8 @@
             color: #666;
         }
     `;
+
+
     document.head.appendChild(style);
 
     // 체크박스 및 레이블 생성
@@ -66,6 +79,61 @@
     let countdownIntervalId; // 카운트다운 인터벌의 ID
     let countdown; // 남은 시간(초)
     let scheduledFlag = false;
+
+
+    const dragItem = document.getElementById('autoClickerCheckboxContainer');
+    let active = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+    let xOffset = 0;
+    let yOffset = 0;
+
+
+
+    // 드래그 시작 함수
+    function dragStart(e) {
+        initialX = e.clientX - xOffset;
+        initialY = e.clientY - yOffset;
+
+        if (dragItem.contains(e.target)) {
+            active = true;
+        }
+    }
+
+    // 드래그 중 함수
+    function drag(e) {
+        if (active) {
+            e.preventDefault();
+
+            currentX = e.clientX - initialX;
+            currentY = e.clientY - initialY;
+
+            xOffset = currentX;
+            yOffset = currentY;
+
+            setTranslate(currentX, currentY, dragItem);
+        }
+    }
+
+    // 드래그 종료 함수
+    function dragEnd() {
+        initialX = currentX;
+        initialY = currentY;
+
+        active = false;
+    }
+
+    // 위치 설정 함수
+    function setTranslate(xPos, yPos, el) {
+        el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
+    }
+
+    // 이벤트 리스너 추가
+    dragItem.addEventListener("mousedown", dragStart, false);
+    document.addEventListener("mouseup", dragEnd, false);
+    document.addEventListener("mousemove", drag, false);
 
     // XPath를 사용하여 버튼을 선택하는 함수
     function getButtonByXPath(xpath) {
@@ -120,3 +188,4 @@
         }
     });
 })();
+
