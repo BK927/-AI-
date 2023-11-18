@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NovelAI auto generator
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.3
 // @description  nai로 무한 생성해보자.
 // @author       BK927
 // @match        https://novelai.net/image
@@ -11,6 +11,7 @@
 // @updateURL https://openuserjs.org/meta/BK927/NovelAI_auto_generator.meta.js
 // @downloadURL https://openuserjs.org/install/BK927/NovelAI_auto_generator.user.js
 // ==/UserScript==
+
 
 
 (function() {
@@ -50,6 +51,15 @@
             font-size: 0.9em;
             color: #666;
         }
+        .inputField {
+            margin-left: 10px;
+            margin-right: 5px;
+            width: 50px;
+            padding: 3px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
     `;
 
 
@@ -72,6 +82,23 @@
     countdownContainer.id = 'countdownContainer';
     countdownContainer.textContent = '남은 시간: 0.0초';
     checkboxContainer.appendChild(countdownContainer);
+
+    const minDelayInput = document.createElement('input');
+    minDelayInput.className = 'inputField';
+    minDelayInput.type = 'number';
+    minDelayInput.min = '0';
+    minDelayInput.value = '4'; // Default min delay
+    minDelayInput.placeholder = '최소 대기시간';
+
+    const maxDelayInput = document.createElement('input');
+    maxDelayInput.className = 'inputField';
+    maxDelayInput.type = 'number';
+    maxDelayInput.min = '0';
+    maxDelayInput.value = '8'; // Default max delay
+    maxDelayInput.placeholder = '최대 대기시간';
+
+    checkboxContainer.appendChild(minDelayInput);
+    checkboxContainer.appendChild(maxDelayInput);
 
     document.body.appendChild(checkboxContainer);
 
@@ -124,6 +151,16 @@
 
         active = false;
     }
+
+    minDelayInput.addEventListener('change', () => {
+        const minDelay = parseFloat(minDelayInput.value);
+        const maxDelay = parseFloat(maxDelayInput.value);
+
+        if (minDelay > maxDelay) {
+            maxDelayInput.value = minDelay;
+        }
+    });
+
 
     // 위치 설정 함수
     function setTranslate(xPos, yPos, el) {
@@ -179,13 +216,12 @@
             clickButton(); // 첫 클릭 실행
             // 인터벌 설정
             setInterval(() => {
-                if (checkbox.checked && !button.disabled && !scheduledFlag) {
+                if (checkbox.checked && !button.disabled && !scheduledFlag && maxDelayInput.value !== '' && minDelayInput.value !== '') {
                     scheduledFlag = true;
-                    const delay = Math.random() * 6000 + 2000; // 2초에서 8초 사이의 랜덤 딜레이
+                    const delay = Math.random() * parseFloat(maxDelayInput.value) * 1000 + parseFloat(minDelayInput.value) * 1000; // 4초에서 12초 사이의 랜덤 딜레이
                     scheduleNextClick(delay); // 다음 클릭 스케줄링 및 카운트다운 시작
                 }
             }, 500); // 0.5초마다 반복
         }
     });
 })();
-
