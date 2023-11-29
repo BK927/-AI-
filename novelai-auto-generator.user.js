@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NovelAI auto generator
 // @namespace    http://tampermonkey.net/
-// @version      2.0
+// @version      2.1
 // @description  nai로 무한 생성해보자.
 // @author       BK927
 // @match        https://novelai.net/image
