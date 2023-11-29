@@ -238,7 +238,7 @@
     // 자동크릭 이벤트 리스너
     autoClickInput.addEventListener('change', () => {
         const button = getElementByXPath('//*[@id="__next"]/div[2]/div[4]/div[1]/div[5]/button');
-        if (autoClickInput.checked) {
+        if (autoClickInput.checked && button != null) {
             clickButton(); // 첫 클릭 실행
             // 인터벌 설정
             setInterval(() => {
@@ -255,13 +255,19 @@
     // 자동저장 이벤트 리스터
     let observer = null;
     autoSaveInput.addEventListener('change', () => {
-        const imgContainer = getElementByXPath('//*[@id="__next"]/div[2]/div[4]/div[2]/div[2]/div[2]');
+        const imgContainer = getElementByXPath('/html/body');
+        if (imgContainer == null) {
+            return;
+        }
 
         // 자동 저장이 체크되었을시
         if (autoSaveInput.checked) {
             // 이미지 변화 감지
             observer = new MutationObserver(mutations => {
                 mutations.forEach(mutation => {
+                    // 변화 디버깅을 위한 로그 출력
+                    //console.log('Mutation detected:', mutation);
+
                     // 자식 노드 중에 img src가 변화하면 저장 버튼 클릭
                     if (mutation.type === 'attributes' && mutation.attributeName === 'src' && mutation.target.tagName === 'IMG') {
                         const button = getElementByXPath('//*[@id="__next"]/div[2]/div[4]/div[2]/div[2]/div[3]/div/div[3]/div/div[3]/button');
@@ -269,24 +275,16 @@
                     }
                 });
             });
+            const config = {attributes: true, subtree: true};
 
-            // 로딩이 덜 되서 노드를 발견할 수 없으면 observe하지 않는다.
-            if (imgContainer != null) {
-                const config = {attributes: true, subtree: true};
-
-                observer.observe(imgContainer, config);
-            } else {
-                observer = null;
-            }
-
-
+            observer.observe(imgContainer, config);
         }
         else{
             // 사용하지 않으면 리소스 절약을 위해 해제.
             if(observer != null){
                 observer.disconnect();
-                observer = null;
             }
+            observer = null;
         }
     });
 })();
