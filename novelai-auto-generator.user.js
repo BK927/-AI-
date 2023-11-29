@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NovelAI auto generator
 // @namespace    http://tampermonkey.net/
-// @version      2.1
+// @version      2.2
 // @description  nai로 무한 생성해보자.
 // @author       BK927
 // @match        https://novelai.net/image
@@ -126,10 +126,11 @@
 
     document.body.appendChild(autoClickerContainer);
 
-    let timeoutId; // setTimeout의 ID를 저장
+    let autoClickIntervalId;
     let countdownIntervalId; // 카운트다운 인터벌의 ID
     let countdown; // 남은 시간(초)
     let scheduledFlag = false;
+    let imgSavedFlag = false; // 이미지 저장했는지 체크
 
 
     const dragItem = document.getElementById('autoClickerContainer');
@@ -215,12 +216,11 @@
     // 자동 클릭 타임아웃 함수
     function scheduleNextClick(delay) {
         countdown = delay / 1000;
-        updateCountdownDisplay();
         clearInterval(countdownIntervalId);
         countdownIntervalId = setInterval(updateCountdownDisplay, 100); // 0.1초마다 카운트다운 업데이트
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(clickButton, delay);
-        setTimeout(clickButton, delay);
+        setTimeout(() => {
+            imgSavedFlag = false;
+            clickButton();}, delay);
     }
 
     // 남은 시간을 표시하는 함수
@@ -241,50 +241,26 @@
         if (autoClickInput.checked && button != null) {
             clickButton(); // 첫 클릭 실행
             // 인터벌 설정
-            setInterval(() => {
+            autoClickIntervalId = setInterval(() => {
                 if (autoClickInput.checked && !button.disabled && !scheduledFlag && maxDelayInput.value !== '' && minDelayInput.value !== '') {
                     scheduledFlag = true;
-                    const delay = Math.random() * parseFloat(maxDelayInput.value) * 1000 + parseFloat(minDelayInput.value) * 1000; // 4초에서 12초 사이의 랜덤 딜레이
+                    const delay = Math.random() * parseFloat(maxDelayInput.value) * 1000 + parseFloat(minDelayInput.value) * 1000; // 랜덤 딜레이
                     scheduleNextClick(delay); // 다음 클릭 스케줄링 및 카운트다운 시작
+                }
+
+                if(autoSaveInput.checked && !button.disabled && !imgSavedFlag){
+                    const saveButton = getElementByXPath('//*[@id="__next"]/div[2]/div[4]/div[2]/div[2]/div[3]/div/div[3]/div/div[3]/button');
+                    if(saveButton != null){
+                        saveButton.click();
+                        imgSavedFlag = true;
+                    }
                 }
             }, 500); // 0.5초마다 반복
         }
-    });
 
-
-    // 자동저장 이벤트 리스터
-    let observer = null;
-    autoSaveInput.addEventListener('change', () => {
-        const imgContainer = getElementByXPath('/html/body');
-        if (imgContainer == null) {
-            return;
-        }
-
-        // 자동 저장이 체크되었을시
-        if (autoSaveInput.checked) {
-            // 이미지 변화 감지
-            observer = new MutationObserver(mutations => {
-                mutations.forEach(mutation => {
-                    // 변화 디버깅을 위한 로그 출력
-                    //console.log('Mutation detected:', mutation);
-
-                    // 자식 노드 중에 img src가 변화하면 저장 버튼 클릭
-                    if (mutation.type === 'attributes' && mutation.attributeName === 'src' && mutation.target.tagName === 'IMG') {
-                        const button = getElementByXPath('//*[@id="__next"]/div[2]/div[4]/div[2]/div[2]/div[3]/div/div[3]/div/div[3]/button');
-                        button.click();
-                    }
-                });
-            });
-            const config = {attributes: true, subtree: true};
-
-            observer.observe(imgContainer, config);
-        }
-        else{
-            // 사용하지 않으면 리소스 절약을 위해 해제.
-            if(observer != null){
-                observer.disconnect();
-            }
-            observer = null;
+        if(!autoClickInput.checked){
+            clearInterval(autoClickIntervalId);
         }
     });
+
 })();
